@@ -53,7 +53,13 @@ func marshalDeepObject(in interface{}, path []string) ([]string, error) {
 		// Now, for a concrete value, we will turn the path elements
 		// into a deepObject style set of subscripts. [a, b, c] turns into
 		// [a][b][c]
-		prefix := "[" + strings.Join(path, "][") + "]"
+		// prefix := "[" + path[0] + "]" + strings.Join(path[1:], ",")
+		var prefix string
+		if len(path) == 2 {
+			prefix = "[" + path[0] + "]"
+		} else {
+			prefix = "[" + strings.Join(path, "][") + "]"
+		}
 		result = []string{
 			prefix + fmt.Sprintf("=%v", t),
 		}
@@ -82,10 +88,20 @@ func MarshalDeepObject(i interface{}, paramName string) (string, error) {
 	}
 
 	// Prefix the param name to each subscripted field.
+	vals := make([]string, 0)
 	for i := range fields {
 		fields[i] = paramName + fields[i]
+
+		parts := strings.Split(fields[i], "=")
+		if len(parts) == 2 {
+			vals = append(vals, parts[1])
+		}
 	}
-	return strings.Join(fields, "&"), nil
+	if len(fields) > 0 {
+		return fields[0] + strings.Join(vals, ","), nil
+	} else {
+		return strings.Join(fields, "&"), nil
+	}
 }
 
 type fieldOrValue struct {
