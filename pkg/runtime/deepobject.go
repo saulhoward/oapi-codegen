@@ -90,6 +90,7 @@ func MarshalDeepObject(i interface{}, paramName string) (string, error) {
 	// Prefix the param name to each subscripted field.
 	vals := make([]string, 0)
 	for i := range fields {
+		// fields[i] = paramName + fields[i]
 		fields[i] = paramName + fields[i]
 
 		parts := strings.Split(fields[i], "=")
@@ -98,7 +99,11 @@ func MarshalDeepObject(i interface{}, paramName string) (string, error) {
 		}
 	}
 	if len(fields) > 0 {
-		return fields[0] + strings.Join(vals, ","), nil
+		f := fields[0]
+		if len(vals) > 0 {
+			f = f + "," + strings.Join(vals[1:], ",")
+		}
+		return f, nil
 	} else {
 		return strings.Join(fields, "&"), nil
 	}
